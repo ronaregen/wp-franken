@@ -24,6 +24,7 @@ if ($db_type == 'sqlite') {
 	define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
 	define('DB_HOST', getenv('DB_HOST') ?: 'db');
 }
+define('FS_METHOD', 'direct');
 
 // 3. Salts (Require dari file otomatis)
 if (file_exists(__DIR__ . '/wp-content/wp-salts.php')) {
