@@ -1,48 +1,42 @@
 #!/bin/bash
 set -e
 
-# 1. Setup SQLite Translator (db.php)
+# 1. Setup SQLite Translator (Hybrid Mode)
 if [ "$DB_TYPE" = "sqlite" ]; then
-    echo "Mode: SQLite detected."
-    
-    # Pastiin folder database ada
+    echo "Mode: SQLite"
     mkdir -p /var/www/html/wp-content/database
+    mkdir -p /var/www/html/wp-content/plugins
 
     if [ ! -f "/var/www/html/wp-content/db.php" ]; then
-        echo "Installing SQLite translator..."
-        # Download plugin
+        echo "Installing SQLite translator & plugin..."
         curl -L https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip -o /tmp/sqlite-plugin.zip
-        
-        # Unzip ke folder sementara
         unzip /tmp/sqlite-plugin.zip -d /tmp/
         
-        # Copy file sakti db.copy jadi db.php
-        cp /tmp/sqlite-database-integration/db.copy /var/www/html/wp-content/db.php
+        # PINDAHKAN SELURUH FOLDER PLUGIN (Ini yang tadi kurang!)
+        cp -r /tmp/sqlite-database-integration /var/www/html/wp-content/plugins/
         
-        # Bersihin sampah
+        # COPY DROP-IN KE WP-CONTENT
+        cp /var/www/html/wp-content/plugins/sqlite-database-integration/db.copy /var/www/html/wp-content/db.php
+        
         rm -rf /tmp/sqlite-plugin.zip /tmp/sqlite-database-integration
-        echo "SQLite translator installed successfully."
+        echo "SQLite system is ready!"
     fi
 else
-    echo "Mode: MariaDB/MySQL detected."
-    # Hapus db.php kalau ada biar gak bentrok sama MySQL
+    echo "Mode: MariaDB/MySQL"
     if [ -f "/var/www/html/wp-content/db.php" ]; then
-        echo "Removing SQLite translator..."
         rm "/var/www/html/wp-content/db.php"
     fi
 fi
 
-# 2. Setup Salts (Logic yang kemarin)
+# 2. Setup Salts
 SALT_FILE="/var/www/html/wp-content/wp-salts.php"
 if [ ! -f "$SALT_FILE" ]; then
-    echo "Generating new WordPress salts..."
+    echo "Generating salts..."
     curl -s https://api.wordpress.org/secret-key/1.1/salt/ > "$SALT_FILE"
-    # Tambahin tag PHP di baris pertama
     sed -i '1i <?php' "$SALT_FILE"
 fi
 
-# 3. Fix Permissions (Wajib biar gak error 'Database is locked')
-echo "Setting permissions for www-data..."
+# 3. Fix Permissions
 chown -R www-data:www-data /var/www/html/wp-content
 
 exec "$@"
