@@ -1,18 +1,22 @@
 <?php
-// 1. Fix Redirect Loop buat Easypanel
+// 1. Proxy Fix
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
 	$_SERVER['HTTPS'] = 'on';
 }
 
-// 2. Logic Hybrid Database (SQLite / MariaDB)
-$db_type = trim(strtolower(getenv('DB_TYPE') ?: 'sqlite'));
+// 2. Logic Hybrid Database (Gaya Paling Galak)
+$raw_env = getenv('DB_TYPE');
+if (empty($raw_env)) {
+	$db_type = 'sqlite'; // Paksa default kalau kosong
+} else {
+	$db_type = trim(strtolower($raw_env));
+}
 
-if ($db_type === 'sqlite') {
+if ($db_type == 'sqlite') {
 	define('DB_ENGINE', 'sqlite');
-	// WordPress Core butuh ini tetap ada supaya gak error duluan
-	define('DB_NAME', 'sqlite_db');
-	define('DB_USER', 'sqlite');
-	define('DB_PASSWORD', 'sqlite');
+	define('DB_NAME', 'wp_sqlite');
+	define('DB_USER', 'root');
+	define('DB_PASSWORD', 'root');
 	define('DB_HOST', 'localhost');
 } else {
 	define('DB_NAME', getenv('DB_NAME') ?: 'wp_db');
@@ -21,14 +25,14 @@ if ($db_type === 'sqlite') {
 	define('DB_HOST', getenv('DB_HOST') ?: 'db');
 }
 
-// 3. PANGGIL SALT OTOMATIS
-// File ini digenerate sama entrypoint.sh di folder wp-content
+// 3. Salts (Require dari file otomatis)
 if (file_exists(__DIR__ . '/wp-content/wp-salts.php')) {
 	require_once __DIR__ . '/wp-content/wp-salts.php';
 }
 
 $table_prefix = 'wp_';
-define('WP_DEBUG', false);
+define('WP_DEBUG', true);
+define('WP_DEBUG_DISPLAY', true);
 
 if (!defined('ABSPATH')) {
 	define('ABSPATH', __DIR__ . '/');

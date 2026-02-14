@@ -1,10 +1,10 @@
-FROM dunglas/frankenphp:latest
+FROM dunglas/frankenphp:latest-php8.3
 
 RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     && rm -rf /var/lib/apt/lists/*
-    
+
 RUN install-php-extensions \
     pdo_sqlite \
     sqlite3 \
