@@ -5,7 +5,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 }
 
 // 2. Logic Hybrid Database (SQLite / MariaDB)
-$db_type = getenv('DB_TYPE') ?: 'sqlite';
+$db_type = trim(strtolower(getenv('DB_TYPE') ?: 'sqlite'));
 
 if ($db_type === 'sqlite') {
 	define('DB_ENGINE', 'sqlite');
