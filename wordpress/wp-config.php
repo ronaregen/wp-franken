@@ -32,8 +32,8 @@ if (file_exists(__DIR__ . '/wp-content/wp-salts.php')) {
 }
 
 $table_prefix = 'wp_';
-define('WP_DEBUG', true);
-define('WP_DEBUG_DISPLAY', true);
+define('WP_DEBUG', getenv('WP_DEBUG') ?: false);
+define('WP_DEBUG_DISPLAY', getenv('WP_DEBUG_DISPLAY') ?: false);
 
 if (!defined('ABSPATH')) {
 	define('ABSPATH', __DIR__ . '/');
