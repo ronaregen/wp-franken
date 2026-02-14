@@ -1,14 +1,19 @@
-:80 {
-    # Setup PHP Server khusus WordPress
-    php_server
+{
+    # Kasih tahu Caddy urutan pengerjaan php_server
+    frankenphp
+    order php_server before file_server
+}
 
-    # Kompresi biar loading ngebut
+:80 {
+    # Root folder WordPress lo
+    root * /var/www/html
+    
+    # Kompresi biar web enteng
     encode zstd br gzip
 
-    # Agar file statis langsung dilayani
+    # Jalankan PHP
+    php_server
+    
+    # Melayani file statis (css, js, gambar)
     file_server
-
-    log {
-        output stdout
-    }
 }
