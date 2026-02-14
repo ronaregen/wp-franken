@@ -1,0 +1,45 @@
+name: Build and Push with Versioning
+
+on:
+  push:
+    # Jalan kalau push ke main (untuk :latest) 
+    # ATAU kalau lo bikin tag baru (v1.0.0, dst)
+    branches: [ "main" ]
+    tags: [ "v*.*.*" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/wp-franken
+          tags: |
+            # Tag otomatis jadi :latest kalau push ke main
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            # Tag otomatis dari Git Tag (misal v1.0.1)
+            type=semver,pattern={{version}}
+            # Tag versi pendek (misal v1)
+            type=semver,pattern={{major}}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Ambil hasil kalkulasi tag dari step 'meta' di atas
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

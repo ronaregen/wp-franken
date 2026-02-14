@@ -1,0 +1,16 @@
+# Variabel ini akan diisi dari docker-compose
+{$SERVER_NAME} {
+    # Setup PHP Server khusus WordPress
+    php_server
+
+    # Kompresi biar loading ngebut
+    encode zstd br gzip
+
+    # Agar file statis (image/css/js) langsung dilayani tanpa PHP
+    file_server
+
+    # Log ke stdout (standar Docker)
+    log {
+        output stdout
+    }
+}
